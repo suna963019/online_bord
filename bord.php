@@ -106,11 +106,11 @@ echo ini_set('display_errors', 1);
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
     if (isset($_REQUEST['move'])) {
         switch ($_REQUEST['move']) {
-            case 'add':
+            case 'add'://コメントの追加
                 $sql = $pdo->prepare('insert into chat_data value(null,?,?,0,?)');
                 $sql->execute([$_REQUEST['name'], date("Y/m/d H:i:s"), $_REQUEST['text']]);
                 break;
-            case 'nice':
+            case 'nice'://いいねの処理
                 $sql = $pdo->prepare('update chat_data set nice=nice+1 where id=?');
                 $sql->execute([$_REQUEST['id']]);
                 break;
@@ -125,6 +125,7 @@ echo ini_set('display_errors', 1);
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
     $pagedata = $pdo->query("select * from chat_data order by id desc limit $page[0],$page[1]");
 
+    //チャットの表示
     foreach ($pagedata as $data) {
         echo '<div class="row">';
         echo '<div class="line">';
@@ -166,8 +167,6 @@ echo ini_set('display_errors', 1);
         echo '</div>';
     }
     ?>
-
-
 
     <!-- <form action="bord.php" method="post">
  <input type="hidden" name="name" value="<?php $_REQUEST['name']; ?>">
