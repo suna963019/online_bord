@@ -104,6 +104,7 @@ echo ini_set('display_errors', 1);
     <br>
     <?php
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
+    
     if (isset($_REQUEST['move'])) {
         switch ($_REQUEST['move']) {
             case 'add'://コメントの追加
@@ -116,7 +117,10 @@ echo ini_set('display_errors', 1);
                 break;
             default:
         }
+        $lastId=$pdo->query("select max(id) as maxId from chat_data");
+        $newId=$lastId['maxId']+1;
     }
+    
 
     // if (is_null($pagenum)) {
     //     $pagenum = 0;
