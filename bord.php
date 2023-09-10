@@ -85,6 +85,10 @@ echo ini_set('display_errors', 1);
 
     <form action="bord.php" method="post" id="input">
         <input type="hidden" name="move" value="add">
+        <input type="hidden" name="newId" value="<?php
+                                                    if (isset($_REQUEST['newId'])) {
+                                                        echo $_REQUEST['newId'];
+                                                    } ?>">
         <label>
             <p>名前</p>
 
@@ -104,23 +108,26 @@ echo ini_set('display_errors', 1);
     <br>
     <?php
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
-    
-    if (isset($_REQUEST['move'])) {
+    $lastId = $pdo->query("select max(id) as maxId from chat_data");
+    $newId = $lastId['maxId'] + 1;
+    $doubleCheck=false;
+    if (isset($_REQUEST['newId']) && $_REQUEST['newId'] != $newId) {
+        $doubleCheck=true;
+    }
+    if (isset($_REQUEST['move'])&&$doubleCheck) {
         switch ($_REQUEST['move']) {
-            case 'add'://コメントの追加
+            case 'add': //コメントの追加
                 $sql = $pdo->prepare('insert into chat_data value(null,?,?,0,?)');
                 $sql->execute([$_REQUEST['name'], date("Y/m/d H:i:s"), $_REQUEST['text']]);
                 break;
-            case 'nice'://いいねの処理
+            case 'nice': //いいねの処理
                 $sql = $pdo->prepare('update chat_data set nice=nice+1 where id=?');
                 $sql->execute([$_REQUEST['id']]);
                 break;
             default:
         }
-        $lastId=$pdo->query("select max(id) as maxId from chat_data");
-        $newId=$lastId['maxId']+1;
     }
-    
+
 
     // if (is_null($pagenum)) {
     //     $pagenum = 0;
@@ -158,6 +165,7 @@ echo ini_set('display_errors', 1);
         echo '</p>';
         echo '<form action="bord.php" method="post">';
         echo '<input type="hidden" name="point" value="', $data['nice'], '">';
+        echo '<input type="hidden" name="newId" value="', $data['newId'], '">';
         echo '<input type="hidden" name="id" value="', $data['id'], '">';
         echo '<input type="hidden" name="name" value="';
         if (isset($_REQUEST['name'])) {
