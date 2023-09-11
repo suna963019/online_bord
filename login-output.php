@@ -11,7 +11,7 @@
     $sql = $pdo->prepare("select * from user where (id=? or name=?) and password=?");
     $sql->execute([$_REQUEST["id"], $_REQUEST["id"], $_REQUEST["pass"]]);
     foreach ($sql as $row) {
-        $_SESSION['customer'] = ['id' => $row['id'], 'name' => $row['name'], 'password' => $row['password']];
+        $_SESSION['customer'] = ['id' => $row['id'], 'name' => $row['name'], 'password' => $row['password'], 'pagenum' => 0, 'sort' => 'desc'];
     }
 
     echo "<p>";

@@ -96,6 +96,12 @@ echo ini_set('display_errors', 1);
                 $sql->execute([$_REQUEST['id']]);
                 header('local:http://localhost/~itsys/practice extra/online_bord/bord.php');
                 exit;
+            case 'nomal': //次のぺージ
+                $_SESSION['sort']="";
+                break;
+            case 'desc': //次のぺージ
+                $_SESSION['sort']="order by id desc";
+                break;
             case 'page_up': //次のぺージ
                 $pagenum++;
                 break;
@@ -107,7 +113,7 @@ echo ini_set('display_errors', 1);
     }
     //現在のページ番号を取得
     if (isset($_SESSION[`pagenum`])) {
-        $pagenum=$_SESSION[`pagenum`];
+        $pagenum = $_SESSION[`pagenum`];
     }
     if (!isset($pagenum)) {
         $pagenum = 0;
@@ -119,15 +125,15 @@ echo ini_set('display_errors', 1);
     <form action="bord.php" method="post" id="input">
         <input type="hidden" name="move" value="add">
         <input type="hidden" name="pagenum" value="<?php
-        echo $pagenum
-        ?>">
+                                                    echo $pagenum
+                                                    ?>">
         <label>
             <p>名前</p>
 
             <input type="text" name="name" value="<?php
-            if (isset($_SESSION['name'])) {
-                echo $_SESSION['name'];
-            } ?>">
+                                                    if (isset($_SESSION['name'])) {
+                                                        echo $_SESSION['name'];
+                                                    } ?>">
         </label>
         <label>
             <p>内容</p>
@@ -138,12 +144,14 @@ echo ini_set('display_errors', 1);
         </label>
     </form>
     <br>
-    <div id="sort">
+    <div class="line">
         <form action="bord.php" method="post">
-
+            <input type="hidden" name="move" value="desc">
+            <input type="submit" value="新しい順">
         </form>
         <form action="bord.php" method="post">
-
+            <input type="hidden" name="move" value="nomal">
+            <input type="submit" value="古い順">
         </form>
     </div>
     <br>
@@ -151,9 +159,10 @@ echo ini_set('display_errors', 1);
 
 
     <?php
-    
+
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
-    $pagedata = $pdo->query("select * from chat_data order by id desc limit $page[0],$page[1]");
+    $sort=$_SESSION['sort'];
+    $pagedata = $pdo->query("select * from chat_data $sort limit $page[0],$page[1]");
 
     //チャットの表示
     foreach ($pagedata as $data) {
@@ -197,19 +206,6 @@ echo ini_set('display_errors', 1);
         echo '</div>';
     }
     ?>
-
-    <!-- <form action="bord.php" method="post">
- <input type="hidden" name="name" value="<?php $_REQUEST['name']; ?>">
-    <input type="hidden" name="pagenum" value="<?php echo $pagenum; ?>">
-    <input type="hidden" name="move" value="back">
-    <input type="submit" value="前のページ">
-</form>
- <form action="bord.php" method="post">
- <input type="hidden" name="name" value="<?php $_REQUEST['name']; ?>">
-    <input type="hidden" name="pagenum" value="<?php echo $pagenum; ?>">
-    <input type="hidden" name="move" value="next">
-    <input type="submit" value="次のページ">
-</form> -->
 </body>
 
 </html>
