@@ -1,4 +1,13 @@
-<?php require "header.php"; ?>
+<?php 
+ echo ini_set('display_errors',1);
+ ?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
 <style>
     body {
         background-color: bisque;
@@ -61,4 +70,5 @@
     </div>
 </form>
 
-<?php require "footer.php"; ?>
+</body>
+</html>
