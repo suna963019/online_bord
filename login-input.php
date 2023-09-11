@@ -52,6 +52,7 @@
         margin-left: auto;
     }
 </style>
+<?php require('nav.php'); ?>
 <h1 id="title">ログイン</h1>
 <form action="login-output.php" method="post">
     <label class="line" for="id">

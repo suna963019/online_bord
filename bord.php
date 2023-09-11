@@ -121,7 +121,7 @@ echo ini_set('display_errors', 1);
     }
     ?>
 
-    <h1>Y</h1>
+    <?php require('nav.php'); ?>
 
     <form action="bord.php" method="post" id="input">
         <input type="hidden" name="move" value="add">

@@ -54,6 +54,7 @@
         margin-left: auto;
     }
 </style>
+<?php require('nav.php'); ?>
 <h1 id="title">新規登録</h1>
 <form action="acount-output.php" method="post">
     <label class="line" for="id">
