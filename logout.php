@@ -12,10 +12,10 @@
 <?php 
 unset($_SESSION['customer']);
  ?>
- ログアウトしました。２秒後<a href="index.php">ホーム</a>に戻ります。
+ ログアウトしました。２秒後<a href="bord.php">ホーム</a>に戻ります。
 <script>
 setTimeout(function () {
-            window.location.href= "index.php";
+            window.location.href= "bord.php";
          },2000);
 </script>
 </body>

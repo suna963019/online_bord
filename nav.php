@@ -1,11 +1,12 @@
-<h1 text-algon="center">Y</h1>
-<div display="flex">
+<h1 class="center">Y</h1>
+<div class="flex">
+    <p><a href="bord.php">ホーム</a></p>
     <?php 
     if (isset($_SESSION['customer'])) {
-        echo '<a href="logout.php"><p>ログアウト</p></a>';
+        echo '<p><a href="logout.php">ログアウト</a></p>';
     }else{
-        echo '<a href="acount-input.php"><p>新規アカウント登録</p></a>';
-        echo '<a href="login-input.php"><p>ログイン</p></a>';
+        echo '<p><a href="acount-input.php">新規アカウント登録</a></p>';
+        echo '<p><a href="login-input.php">ログイン</a></p>';
     }
      ?>
 </div>

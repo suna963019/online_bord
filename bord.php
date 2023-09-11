@@ -76,13 +76,30 @@ echo ini_set('display_errors', 1);
         .line * {
             margin: 10px;
         }
+        .center {
+            text-align: center;
+        }
+
+        .flex {
+            text-align: center;
+            display: flex;
+            justify-content: space-around;
+            margin: auto;
+            width: 500px;
+        }
     </style>
 </head>
 
 <body>
+    
+<?php require('nav.php'); ?>
     <?php
+    
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
-    $customer=$_SESSION['customer'];
+    if (isset($_SESSION['customer'])) {
+        $customer=$_SESSION['customer'];
+    };
+    
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
@@ -121,9 +138,17 @@ echo ini_set('display_errors', 1);
     }
     ?>
 
-    <?php require('nav.php'); ?>
-
-    <form action="bord.php" method="post" id="input">
+    <?php 
+    if (!isset($_SESSION['customer'])) {
+        echo '<p>書き込みにはログインが必要です。</p>';
+    }else{
+        if (isset($customer['name'])) {
+            $name=$customer['name'];
+        }else {
+            $name="";
+        }
+        
+        echo '<form action="bord.php" method="post" id="input">
         <input type="hidden" name="move" value="add">
         <input type="hidden" name="pagenum" value="<?php
                                                     echo $pagenum
@@ -131,10 +156,7 @@ echo ini_set('display_errors', 1);
         <label>
             <p>名前</p>
 
-            <input type="text" name="name" value="<?php
-                                                    if (isset($customer['name'])) {
-                                                        echo $customer['name'];
-                                                    } ?>">
+            <input type="text" name="name" value="',$name,'">
         </label>
         <label>
             <p>内容</p>
@@ -155,14 +177,22 @@ echo ini_set('display_errors', 1);
             <input type="submit" value="古い順">
         </form>
     </div>
-    <br>
+    <br>';
+    }
+     ?>
+    
 
 
 
     <?php
 
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
-    $sort=$customer['sort'];
+    if (isset($_SESSION['customer'])) {
+        $sort=$customer['sort'];
+    }else {
+        $sort="order by id desc";
+    }
+    
     $pagedata = $pdo->query("select * from chat_data $sort limit $page[0],$page[1]");
 
     //チャットの表示
