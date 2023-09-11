@@ -79,20 +79,20 @@ echo ini_set('display_errors', 1);
 </head>
 
 <body>
-<?php
+    <?php
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
+
+    //二重投稿チェック
     $lastId = $pdo->query("select max(id) as maxId from chat_data");
     foreach ($lastId as $row) {
-        $newId = $row['maxId']+1;
+        $newId = $row['maxId'];
     }
-
     $doubleCheck = false;
-    if (isset($_REQUEST['newId'])){
-        if ($_REQUEST['newId'] >= $newId) {
-
+    if (isset($_REQUEST['newId']) && $_REQUEST['newId'] >= $newId) {
         $doubleCheck = true;
-        }
     }
+
+    //データベースの編集の処理
     if (isset($_REQUEST['move']) && $doubleCheck) {
         switch ($_REQUEST['move']) {
             case 'add': //コメントの追加
@@ -103,12 +103,27 @@ echo ini_set('display_errors', 1);
                 $sql = $pdo->prepare('update chat_data set nice=nice+1 where id=?');
                 $sql->execute([$_REQUEST['id']]);
                 break;
+            case 'page_up': //次のぺージ
+                $pagenum++;
+                break;
+            case 'page_down': //前のページ
+                $pagenum--;
+                break;
             default:
         }
     }
+
+    //二重チェック用の変数
     $lastId = $pdo->query("select max(id) as maxId from chat_data");
     foreach ($lastId as $row) {
-        $newId = $row['maxId']+1;
+        $newId = $row['maxId'];
+    }
+    //現在のページ番号を取得
+    if (isset($_REQUEST[`pagenum`])) {
+        $pagenum=$_REQUEST[`pagenum`];
+    }
+    if (!isset($pagenum)) {
+        $pagenum = 0;
     }
     ?>
 
@@ -119,13 +134,16 @@ echo ini_set('display_errors', 1);
         <input type="hidden" name="newId" value="<?php
         echo $newId
         ?>">
+        <input type="hidden" name="pagenum" value="<?php
+        echo $pagenum
+        ?>">
         <label>
             <p>名前</p>
 
             <input type="text" name="name" value="<?php
-                                                    if (isset($_REQUEST['name'])) {
-                                                        echo $_REQUEST['name'];
-                                                    } ?>">
+            if (isset($_REQUEST['name'])) {
+                echo $_REQUEST['name'];
+            } ?>">
         </label>
         <label>
             <p>内容</p>
@@ -136,14 +154,11 @@ echo ini_set('display_errors', 1);
         </label>
     </form>
     <br>
-    
+
 
 
     <?php
-    // if (is_null($pagenum)) {
-    //     $pagenum = 0;
-    // }
-    $pagenum = 0;
+    
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
     $pagedata = $pdo->query("select * from chat_data order by id desc limit $page[0],$page[1]");
 
