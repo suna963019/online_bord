@@ -1,6 +1,7 @@
 <?php
 echo ini_set('display_errors', 1);
 ?>
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -82,27 +83,19 @@ echo ini_set('display_errors', 1);
     <?php
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
 
-    //二重投稿チェック
-    $lastId = $pdo->query("select max(id) as maxId from chat_data");
-    foreach ($lastId as $row) {
-        $newId = $row['maxId'];
-    }
-    $doubleCheck = false;
-    if (isset($_REQUEST['newId']) && $_REQUEST['newId'] >= $newId) {
-        $doubleCheck = true;
-    }
-
     //データベースの編集の処理
-    if (isset($_REQUEST['move']) && $doubleCheck) {
+    if (isset($_REQUEST['move'])) {
         switch ($_REQUEST['move']) {
             case 'add': //コメントの追加
                 $sql = $pdo->prepare('insert into chat_data value(null,?,?,0,?)');
                 $sql->execute([$_REQUEST['name'], date("Y/m/d H:i:s"), $_REQUEST['text']]);
-                break;
+                header('Location:http://localhost/~itsys/practice extra/online_bord/bord.php');
+                exit;
             case 'nice': //いいねの処理
                 $sql = $pdo->prepare('update chat_data set nice=nice+1 where id=?');
                 $sql->execute([$_REQUEST['id']]);
-                break;
+                header('local:http://localhost/~itsys/practice extra/online_bord/bord.php');
+                exit;
             case 'page_up': //次のぺージ
                 $pagenum++;
                 break;
@@ -112,15 +105,9 @@ echo ini_set('display_errors', 1);
             default:
         }
     }
-
-    //二重チェック用の変数
-    $lastId = $pdo->query("select max(id) as maxId from chat_data");
-    foreach ($lastId as $row) {
-        $newId = $row['maxId'];
-    }
     //現在のページ番号を取得
-    if (isset($_REQUEST[`pagenum`])) {
-        $pagenum=$_REQUEST[`pagenum`];
+    if (isset($_SESSION[`pagenum`])) {
+        $pagenum=$_SESSION[`pagenum`];
     }
     if (!isset($pagenum)) {
         $pagenum = 0;
@@ -131,9 +118,6 @@ echo ini_set('display_errors', 1);
 
     <form action="bord.php" method="post" id="input">
         <input type="hidden" name="move" value="add">
-        <input type="hidden" name="newId" value="<?php
-        echo $newId
-        ?>">
         <input type="hidden" name="pagenum" value="<?php
         echo $pagenum
         ?>">
@@ -141,8 +125,8 @@ echo ini_set('display_errors', 1);
             <p>名前</p>
 
             <input type="text" name="name" value="<?php
-            if (isset($_REQUEST['name'])) {
-                echo $_REQUEST['name'];
+            if (isset($_SESSION['name'])) {
+                echo $_SESSION['name'];
             } ?>">
         </label>
         <label>
@@ -153,6 +137,15 @@ echo ini_set('display_errors', 1);
             <input type="submit" value="追加">
         </label>
     </form>
+    <br>
+    <div id="sort">
+        <form action="bord.php" method="post">
+
+        </form>
+        <form action="bord.php" method="post">
+
+        </form>
+    </div>
     <br>
 
 
@@ -191,11 +184,10 @@ echo ini_set('display_errors', 1);
         echo '</p>';
         echo '<form action="bord.php" method="post">';
         echo '<input type="hidden" name="point" value="', $data['nice'], '">';
-        echo '<input type="hidden" name="newId" value="', $newId, '">';
         echo '<input type="hidden" name="id" value="', $data['id'], '">';
         echo '<input type="hidden" name="name" value="';
-        if (isset($_REQUEST['name'])) {
-            echo $_REQUEST['name'];
+        if (isset($_SESSION['name'])) {
+            echo $_SESSION['name'];
         }
         echo '">';
         echo '<input type="hidden" name="move" value="nice">';
