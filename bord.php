@@ -82,6 +82,7 @@ echo ini_set('display_errors', 1);
 <body>
     <?php
     $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
+    $customer=$_SESSION['customer'];
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
@@ -97,10 +98,10 @@ echo ini_set('display_errors', 1);
                 header('local:http://localhost/~itsys/practice extra/online_bord/bord.php');
                 exit;
             case 'nomal': //次のぺージ
-                $_SESSION['sort']="";
+                $customer['sort']="";
                 break;
             case 'desc': //次のぺージ
-                $_SESSION['sort']="order by id desc";
+                $customer['sort']="order by id desc";
                 break;
             case 'page_up': //次のぺージ
                 $pagenum++;
@@ -131,8 +132,8 @@ echo ini_set('display_errors', 1);
             <p>名前</p>
 
             <input type="text" name="name" value="<?php
-                                                    if (isset($_SESSION['name'])) {
-                                                        echo $_SESSION['name'];
+                                                    if (isset($customer['name'])) {
+                                                        echo $customer['name'];
                                                     } ?>">
         </label>
         <label>
@@ -161,7 +162,7 @@ echo ini_set('display_errors', 1);
     <?php
 
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
-    $sort=$_SESSION['sort'];
+    $sort=$customer['sort'];
     $pagedata = $pdo->query("select * from chat_data $sort limit $page[0],$page[1]");
 
     //チャットの表示
@@ -195,8 +196,8 @@ echo ini_set('display_errors', 1);
         echo '<input type="hidden" name="point" value="', $data['nice'], '">';
         echo '<input type="hidden" name="id" value="', $data['id'], '">';
         echo '<input type="hidden" name="name" value="';
-        if (isset($_SESSION['name'])) {
-            echo $_SESSION['name'];
+        if (isset($customer['name'])) {
+            echo $customer['name'];
         }
         echo '">';
         echo '<input type="hidden" name="move" value="nice">';
