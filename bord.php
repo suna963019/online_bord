@@ -203,7 +203,7 @@ echo ini_set('display_errors', 1);
         echo $data['id'], ':';
         echo '</p>';
         echo '<h4>';
-        if (is_null($data['name'])) {
+        if (empty($data['name'])) {
             echo '名無しさん';
         } else {
             echo $data['name'], 'さん';
