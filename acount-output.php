@@ -1,3 +1,6 @@
+<?php
+echo ini_set('display_errors', 1);
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -11,7 +14,7 @@
     $pass = $_REQUEST["pass"];
     $returnCheck = true;
 
-    $pdo = new PDO("mysql:host=localhost;dbname=suna_hotel;charset=utf8", "owner", "anjera");
+    $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "owner", "anjera");
     $sqlSel = $pdo->prepare("select * from user where name=?");
     $sqlSel->execute([$id]);
     foreach ($sqlSel as $row) {
@@ -20,12 +23,12 @@
 
     
     if (!isset($acount)&&!preg_match('/^[0-9].*$/',$id)) {
-        // $sqlUpd=$pdo->prepare("insert into user values(null,?,?)");
-        // $sqlUpd->execute([$id,$pass]);
+        $sqlUpd=$pdo->prepare("insert into user values(null,?,?)");
+        $sqlUpd->execute([$id,$pass]);
         echo "<p>";
         echo "登録に成功しました。";
         echo "</p>";
-        echo '<p>２秒後<a href="acount-input.php">ログイン画面</a>へ移動します。</
+        echo '<p>２秒後<a href="login-input.php">ログイン画面</a>へ移動します。</
         p>';
         echo '<script>setTimeout(function(){
             window.location.href = "login-input.php";

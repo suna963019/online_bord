@@ -16,7 +16,7 @@
     $pass = $_REQUEST["pass"];
     $returnCheck = true;
 
-    $pdo = new PDO("mysql:host=localhost;dbname=suna_hotel;charset=utf8", "owner", "anjera");
+    $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "owner", "anjera");
     $sql = $pdo->prepare("select * from user where (id=? or name=?) and password=?");
     $sql->execute([$_REQUEST["id"], $_REQUEST["id"], $_REQUEST["pass"]]);
     foreach ($sql as $row) {
