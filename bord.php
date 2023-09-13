@@ -112,7 +112,7 @@ echo ini_set('display_errors', 1);
             case 'nice': //いいねの処理
                 $sql = $pdo->prepare('update chat_data set nice=nice+1 where id=?');
                 $sql->execute([$_REQUEST['id']]);
-                header('local:http://localhost/~itsys/practice extra/online_bord/bord.php');
+                header('Location:http://localhost/~itsys/practice extra/online_bord/bord.php');
                 exit;
             case 'nomal': //次のぺージ
                 $customer['sort']="";
