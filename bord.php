@@ -103,7 +103,7 @@ echo ini_set('display_errors', 1);
 
     $page_max = $pdo->query("select count(*) as max_num from chat_data");
     $page_max = $page_max->fetch();
-    $page_max=floor($page_max['max_num']/30);
+    $page_max = floor($page_max['max_num'] / 30);
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
@@ -135,6 +135,14 @@ echo ini_set('display_errors', 1);
             case 'page_down': //前のページ
                 $_SESSION['customer']['pagenum']--;
                 break;
+            case 'follow':
+                $sql = $pdo->prepare('insert into follow values(?,?)');
+                $sql->execute([$_SESSION['customer']['id'], $_REQUEST['id']]);
+                break;
+            case 'follow_clear':
+                $sql = $pdo->prepare('delete from follow where follower_id=? and followed_id=?');
+                $sql->execute([$_SESSION['customer']['id'], $_REQUEST['id']]);
+                break;
             default:
         }
     }
@@ -149,7 +157,7 @@ echo ini_set('display_errors', 1);
 
     <?php
     if (!isset($_SESSION['customer'])) {
-        echo '<p>書き込みにはログインが必要です。</p>';
+        echo '<p>書き込み、ソートの利用にはログインが必要です。</p>';
         $login = false;
     } else {
         $login = true;
@@ -181,30 +189,53 @@ echo ini_set('display_errors', 1);
     }
     ?>
     <div class="line">
-        <form action="bord.php" method="post">
-            <input type="hidden" name="move" value="desc">
-            <input type="submit" value="新しい順">
-        </form>
-        <form action="bord.php" method="post">
-            <input type="hidden" name="move" value="nomal">
-            <input type="submit" value="古い順">
-        </form>
-        <p>page</p>
-        <?php 
-        if ($_SESSION['customer']['pagenum'] >0) {
+        
+        
+        <?php
+        if (isset($customer)) {
             echo '<form action="bord.php" method="post">
+                <input type="hidden" name="move" value="desc">
+                <input type="submit" value="新しい順">
+            </form>
+            <form action="bord.php" method="post">
+                <input type="hidden" name="move" value="nomal">
+                <input type="submit" value="古い順">
+            </form>';
+        }
+        echo '<p>page</p>';
+        if (isset($_SESSION['customer'])) {
+            $pagenum = $_SESSION['customer']['pagenum'];
+            $pagecheck = false;
+        } else {
+            if (isset($_GET['pagenum'])) {
+                $pagenum = $_GET['pagenum'];
+            } else {
+                $pagenum = 0;
+            }
+            $pagecheck = true;
+        }
+        if ($pagenum > 0) {
+            echo '<form action="bord.php';
+            if ($pagecheck) {
+                echo '?pagenum=', $pagenum;
+            }
+            echo '" method="post">
             <input type="hidden" name="move" value="page_down">
             <input type="submit" value="<">
         </form>';
         }
-        echo '<p>',$_SESSION['customer']['pagenum'], '/', $page_max,'</p>';
-        if ($_SESSION['customer']['pagenum'] < $page_max) {
-            echo '<form action="bord.php" method="post">
+        echo '<p>', $pagenum, '/', $page_max, '</p>';
+        if ($pagenum < $page_max) {
+            echo '<form action="bord.php';
+            if ($pagecheck) {
+                echo '?pagenum=', $pagenum;
+            }
+            echo '" method="post">
             <input type="hidden" name="move" value="page_up">
             <input type="submit" value=">">
         </form>';
         }
-         ?>
+        ?>
     </div>
     <br>
 
@@ -212,7 +243,8 @@ echo ini_set('display_errors', 1);
 
 
     <?php
-    $pagenum = $_SESSION['customer']['pagenum'];
+
+
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
     if (isset($_SESSION['customer'])) {
         $sort = $customer['sort'];
@@ -236,6 +268,27 @@ echo ini_set('display_errors', 1);
             echo $data['name'], 'さん';
         }
         echo '</h4>';
+        if (isset($_SESSION['customer'])) {
+            $follower_id = $_SESSION['customer']['id'];
+            $followed_id = $data['name_id'];
+            if (!($follower_id == $followed_id)) {
+                $followcheck = $pdo->query("select * from follow where follower_id=$follower_id and followed_id=$followed_id");
+                $followcheck = $followcheck->fetch();
+                if (empty($followcheck)) {
+                    echo '<form action="bord.php" method="post">
+            <input type="hidden" name="move" value="follow">
+            <input type="hidden" name="id" value="', $data['name_id'], '">
+            <input type="submit" value="フォロー">
+            </form>';
+                } else {
+                    echo '<form action="bord.php" method="post">
+            <input type="hidden" name="move" value="follow_clear">
+            <input type="hidden" name="id" value="', $data['name_id'], '">
+            <input type="submit" value="フォロー解除">
+            </form>';
+                }
+            }
+        }
         echo '<p>';
         echo $data['datetime'];
         echo '</p>';

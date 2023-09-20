@@ -25,6 +25,13 @@ create table nice(
 	foreign key(chat_id) references chat_data(id),
 	primary key(user_id,chat_id)
 );
+create table follow(
+	follower_id int(11) not null , 
+	followed_id int(11) not null ,
+	foreign key(follower_id) references user(user_id),
+	foreign key(followed_id) references user(user_id),
+	primary key(follower_id,followed_id)
+);
 
 insert into user values(null, 'owner', 'anjera');
 insert into user values(null, 'Y','twitter' );
