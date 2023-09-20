@@ -14,7 +14,7 @@ echo ini_set('display_errors', 1);
     $pass = $_REQUEST["pass"];
     $returnCheck = true;
 
-    $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "owner", "anjera");
+    $pdo = new PDO("mysql:host=localhost;dbname=suna_bord;charset=utf8", "owner", "anjera");
     $sqlSel = $pdo->prepare("select * from user where name=?");
     $sqlSel->execute([$id]);
     foreach ($sqlSel as $row) {

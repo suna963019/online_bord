@@ -61,11 +61,11 @@ echo ini_set('display_errors', 1);
             border-bottom: 1px solid black;
         }
 
-        .row:nth-child(2n+1) {
+        .row:nth-of-type(2n+1) {
             background-color: palegreen;
         }
 
-        .row:nth-child(2n) {
+        .row:nth-of-type(2n) {
             background-color: paleturquoise;
         }
 
@@ -76,6 +76,7 @@ echo ini_set('display_errors', 1);
         .line * {
             margin: 10px;
         }
+
         .center {
             text-align: center;
         }
@@ -91,34 +92,39 @@ echo ini_set('display_errors', 1);
 </head>
 
 <body>
-    
-<?php require('nav.php'); ?>
+
+    <?php require('nav.php'); ?>
     <?php
-    
-    $pdo = new PDO("mysql:host=localhost;dbname=practice;charset=utf8", "root", "mariadb");
+
+    $pdo = new PDO("mysql:host=localhost;dbname=suna_bord;charset=utf8", "root", "mariadb");
     if (isset($_SESSION['customer'])) {
-        $customer=$_SESSION['customer'];
+        $customer = $_SESSION['customer'];
     };
-    
+
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
         switch ($_REQUEST['move']) {
             case 'add': //コメントの追加
-                $sql = $pdo->prepare('insert into chat_data value(null,?,?,0,?)');
-                $sql->execute([$_REQUEST['name'], date("Y/m/d H:i:s"), $_REQUEST['text']]);
+                $sql = $pdo->prepare('insert into chat_data value(null,?,null,?)');
+                $sql->execute([$_SESSION['customer']['id'], $_REQUEST['text']]);
                 header('Location:http://localhost/~itsys/practice extra/online_bord/bord.php');
                 exit;
             case 'nice': //いいねの処理
-                $sql = $pdo->prepare('update chat_data set nice=nice+1 where id=?');
-                $sql->execute([$_REQUEST['id']]);
+                try {
+                    $sql = $pdo->prepare('insert into nice values(?,?)');
+                    $sql->execute([$_SESSION['customer']['id'], $_REQUEST['id']]);
+                } catch (PDOException $sh) {
+                    $sql = $pdo->prepare('delete from nice where user_id=? and chat_id=?');
+                    $sql->execute([$_SESSION['customer']['id'], $_REQUEST['id']]);
+                }
                 header('Location:http://localhost/~itsys/practice extra/online_bord/bord.php');
                 exit;
-            case 'nomal': //次のぺージ
-                $customer['sort']="";
+            case 'nomal': //古い順
+                $customer['sort'] = "";
                 break;
-            case 'desc': //次のぺージ
-                $customer['sort']="order by id desc";
+            case 'desc': //新しい順
+                $customer['sort'] = "order by chat_data.id desc";
                 break;
             case 'page_up': //次のぺージ
                 $pagenum++;
@@ -138,16 +144,18 @@ echo ini_set('display_errors', 1);
     }
     ?>
 
-    <?php 
+    <?php
     if (!isset($_SESSION['customer'])) {
         echo '<p>書き込みにはログインが必要です。</p>';
-    }else{
+        $login = false;
+    } else {
+        $login = true;
         if (isset($customer['name'])) {
-            $name=$customer['name'];
-        }else {
-            $name="";
+            $name = $customer['name'];
+        } else {
+            $name = "";
         }
-        
+
         echo '<form action="bord.php" method="post" id="input">
         <input type="hidden" name="move" value="add">
         <input type="hidden" name="pagenum" value="<?php
@@ -156,7 +164,7 @@ echo ini_set('display_errors', 1);
         <label>
             <p>名前</p>
 
-            <input type="text" name="name" value="',$name,'">
+            <p>', $name, '</p>
         </label>
         <label>
             <p>内容</p>
@@ -166,7 +174,9 @@ echo ini_set('display_errors', 1);
             <input type="submit" value="追加">
         </label>
     </form>
-    <br>
+    <br>';
+    }
+    ?>
     <div class="line">
         <form action="bord.php" method="post">
             <input type="hidden" name="move" value="desc">
@@ -177,10 +187,8 @@ echo ini_set('display_errors', 1);
             <input type="submit" value="古い順">
         </form>
     </div>
-    <br>';
-    }
-     ?>
-    
+    <br>
+
 
 
 
@@ -188,12 +196,12 @@ echo ini_set('display_errors', 1);
 
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
     if (isset($_SESSION['customer'])) {
-        $sort=$customer['sort'];
-    }else {
-        $sort="order by id desc";
+        $sort = $customer['sort'];
+    } else {
+        $sort = "order by chat_data.id desc";
     }
-    
-    $pagedata = $pdo->query("select * from chat_data $sort limit $page[0],$page[1]");
+
+    $pagedata = $pdo->query("select * from chat_data join user on chat_data.name_id=user.user_id group by chat_data.id $sort limit $page[0],$page[1] "); //
 
     //チャットの表示
     foreach ($pagedata as $data) {
@@ -219,20 +227,21 @@ echo ini_set('display_errors', 1);
         echo '</p>';
         echo '</div>';
         echo '<div class="line">';
+        $user_id = $data['name_id'];
+        $chat_id = $data['id'];
+        $nice_data = $pdo->query("select count(*) as count from nice where chat_id=$chat_id ");
+        $nice_count = $nice_data->fetch();
         echo '<p>';
-        echo $data['nice'];
+        echo $nice_count['count'];
         echo '</p>';
-        echo '<form action="bord.php" method="post">';
-        echo '<input type="hidden" name="point" value="', $data['nice'], '">';
-        echo '<input type="hidden" name="id" value="', $data['id'], '">';
-        echo '<input type="hidden" name="name" value="';
-        if (isset($customer['name'])) {
-            echo $customer['name'];
+        if ($login) {
+            echo '<form action="bord.php" method="post">';
+            echo '<input type="hidden" name="id" value="', $data['id'], '">';
+            echo '<input type="hidden" name="move" value="nice">';
+            echo '<input type="submit" value="いいね">';
+            echo '</form>';
         }
-        echo '">';
-        echo '<input type="hidden" name="move" value="nice">';
-        echo '<input type="submit" value="いいね">';
-        echo '</form>';
+
         echo '</div>';
         echo '</div>';
     }
