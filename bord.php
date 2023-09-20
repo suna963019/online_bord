@@ -101,6 +101,9 @@ echo ini_set('display_errors', 1);
         $customer = $_SESSION['customer'];
     };
 
+    $page_max = $pdo->query("select count(*) as max_num from chat_data");
+    $page_max = $page_max->fetch();
+    $page_max=floor($page_max['max_num']/30);
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
@@ -127,10 +130,10 @@ echo ini_set('display_errors', 1);
                 $customer['sort'] = "order by chat_data.id desc";
                 break;
             case 'page_up': //次のぺージ
-                $pagenum++;
+                $_SESSION['customer']['pagenum']++;
                 break;
             case 'page_down': //前のページ
-                $pagenum--;
+                $_SESSION['customer']['pagenum']--;
                 break;
             default:
         }
@@ -186,6 +189,22 @@ echo ini_set('display_errors', 1);
             <input type="hidden" name="move" value="nomal">
             <input type="submit" value="古い順">
         </form>
+        <p>page</p>
+        <?php 
+        if ($_SESSION['customer']['pagenum'] >0) {
+            echo '<form action="bord.php" method="post">
+            <input type="hidden" name="move" value="page_down">
+            <input type="submit" value="<">
+        </form>';
+        }
+        echo '<p>',$_SESSION['customer']['pagenum'], '/', $page_max,'</p>';
+        if ($_SESSION['customer']['pagenum'] < $page_max) {
+            echo '<form action="bord.php" method="post">
+            <input type="hidden" name="move" value="page_up">
+            <input type="submit" value=">">
+        </form>';
+        }
+         ?>
     </div>
     <br>
 
@@ -193,7 +212,7 @@ echo ini_set('display_errors', 1);
 
 
     <?php
-
+    $pagenum = $_SESSION['customer']['pagenum'];
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
     if (isset($_SESSION['customer'])) {
         $sort = $customer['sort'];
