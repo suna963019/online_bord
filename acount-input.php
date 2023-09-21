@@ -70,6 +70,8 @@ echo ini_set('display_errors', 1);
     <?php require('nav.php'); ?>
     <h1 id="title">新規登録</h1>
     <form action="acount-output.php" method="post">
+        <input type="hidden" name="token" value="<?php 
+        echo htmlspecialchars($token,ENT_COMPAT,'UTF-8');?>">
         <label class="line" for="id">
             <p><span class="required">* </span>お名前(数字のみ不可)</p>
             <input type="text" name="id" id="id" required>

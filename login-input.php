@@ -1,5 +1,11 @@
 <?php
 echo ini_set('display_errors', 1);
+if (empty($_SESSION['token'])) {
+    $token = bin2hex(openssl_random_pseudo_bytes(24));
+    $_SESSION['token'] = $token;
+} else {
+    $token = $_SESSION['token'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -69,6 +75,8 @@ echo ini_set('display_errors', 1);
     <?php require('nav.php'); ?>
     <h1 id="title">ログイン</h1>
     <form action="login-output.php" method="post">
+        <input type="hidden" name="token" value="<?php
+        echo htmlspecialchars($token, ENT_COMPAT, 'UTF-8'); ?>">
         <label class="line" for="id">
             <p><span class="required">* </span>お名前（又はID）</p>
             <input type="text" name="id" id="id" required>

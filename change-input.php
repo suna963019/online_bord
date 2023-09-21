@@ -1,5 +1,12 @@
 <?php
 echo ini_set('display_errors', 1);
+session_start();
+if (empty($_SESSION['token'])) {
+    $token=bin2hex(openssl_random_pseudo_bytes(24));
+    $_SESSION['token']=$token;
+}else{
+    $token=$_SESSION['token'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -10,7 +17,6 @@ echo ini_set('display_errors', 1);
 </head>
 
 <body>
-    <?php session_start(); ?>
     <style>
         body {
             background-color: bisque;
@@ -70,17 +76,17 @@ echo ini_set('display_errors', 1);
     <?php require('nav.php'); ?>
     <h1 id="title">プロフィール変更</h1>
     <form action="login-output.php" method="post">
+    <input type="hidden" name="token" value="<?php 
+        echo htmlspecialchars($token,ENT_COMPAT,'UTF-8');?>">
         <label class="line" for="id">
             <p>お名前</p>
             <input type="text" name="newId" id="id" <?php
-                                                    echo 'value="', $_SESSION['id'], '"';
-                                                    ?>>
+            echo 'value="', $_SESSION['id'], '"';?>>
         </label>
         <label class="line" for="pass">
             <p>パスワード</p>
             <input type="password" name="newPass" id="pass" <?php
-                                                            echo 'value="', $_SESSION['pass'], '"';
-                                                            ?>>
+            echo 'value="', $_SESSION['pass'], '"';?>>
         </label>
         <div class="line">
             <input type="submit" value="変更" id="submit">

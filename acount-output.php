@@ -1,5 +1,8 @@
 <?php
 echo ini_set('display_errors', 1);
+if (empty($_SESSION['token'])||$token!==$_SESSION['token']) {
+    die('正規の画面からご使用ください');
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">

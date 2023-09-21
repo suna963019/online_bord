@@ -1,7 +1,6 @@
 <?php
 echo ini_set('display_errors', 1);
-?>
-<?php session_start(); ?>
+session_start(); ?>
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -107,6 +106,9 @@ echo ini_set('display_errors', 1);
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
+        if (empty($_SESSION['token']) || $token !== $_SESSION['token']) {
+            die('正規の画面からご使用ください');
+        }
         switch ($_REQUEST['move']) {
             case 'add': //コメントの追加
                 $sql = $pdo->prepare('insert into chat_data value(null,?,null,?)');
@@ -168,6 +170,7 @@ echo ini_set('display_errors', 1);
         }
 
         echo '<form action="bord.php" method="post" id="input">
+        <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
         <input type="hidden" name="move" value="add">
         <input type="hidden" name="pagenum" value="<?php
                                                     echo $pagenum
@@ -189,8 +192,8 @@ echo ini_set('display_errors', 1);
     }
     ?>
     <div class="line">
-        
-        
+
+
         <?php
         if (isset($customer)) {
             echo '<form action="bord.php" method="post">
