@@ -170,18 +170,16 @@ if (empty($_SESSION['token'])) {
         $login = false;
     } else {
         $login = true;
-        if (isset($customer['name'])) {
-            $name = $customer['name'];
-        } else {
-            $name = "";
-        }
+        $name = $customer['name'];
 
         echo '<form action="bord.php" method="post" id="input">
         <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
         <input type="hidden" name="move" value="add">
-        <input type="hidden" name="pagenum" value="<?php
-                                                    echo $pagenum
-                                                    ?>">
+        <input type="hidden" name="pagenum" value="',$pagenum,'">
+        <label>
+            <p>-ID-</p>
+            <p>',$_SESSION['customer']['id'],'</p>
+        </label>
         <label>
             <p>名前</p>
 
@@ -199,7 +197,6 @@ if (empty($_SESSION['token'])) {
     }
     ?>
     <div class="line">
-
 
         <?php
         if (isset($customer)) {
@@ -271,11 +268,7 @@ if (empty($_SESSION['token'])) {
         echo $data['id'], ':';
         echo '</p>';
         echo '<h4>';
-        if (empty($data['name'])) {
-            echo '名無しさん';
-        } else {
-            echo $data['name'], 'さん';
-        }
+        echo $data['name'], 'さん';
         echo '</h4>';
         if (isset($_SESSION['customer'])) {
             $follower_id = $_SESSION['customer']['id'];
