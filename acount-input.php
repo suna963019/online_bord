@@ -1,5 +1,12 @@
 <?php
 echo ini_set('display_errors', 1);
+session_start();
+if (empty($_SESSION['token'])) {
+    $token = bin2hex(openssl_random_pseudo_bytes(24));
+    $_SESSION['token'] = $token;
+} else {
+    $token = $_SESSION['token'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">

@@ -1,6 +1,13 @@
 <?php
 echo ini_set('display_errors', 1);
-session_start(); ?>
+session_start();
+if (empty($_SESSION['token'])) {
+    $token = bin2hex(openssl_random_pseudo_bytes(24));
+    $_SESSION['token'] = $token;
+} else {
+    $token = $_SESSION['token'];
+}
+ ?>
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -106,7 +113,7 @@ session_start(); ?>
 
     //データベースの編集の処理
     if (isset($_REQUEST['move'])) {
-        if (empty($_SESSION['token']) || $token !== $_SESSION['token']) {
+        if (empty($_SESSION['token']) || $_POST['token'] !== $_SESSION['token']) {
             die('正規の画面からご使用ください');
         }
         switch ($_REQUEST['move']) {
@@ -126,10 +133,10 @@ session_start(); ?>
                 header('Location:http://localhost/~itsys/practice extra/online_bord/bord.php');
                 exit;
             case 'nomal': //古い順
-                $customer['sort'] = "";
+                $_SESSION['customer']['sort'] = " ";
                 break;
             case 'desc': //新しい順
-                $customer['sort'] = "order by chat_data.id desc";
+                $_SESSION['customer']['sort'] = "order by chat_data.id desc";
                 break;
             case 'page_up': //次のぺージ
                 $_SESSION['customer']['pagenum']++;
@@ -197,10 +204,12 @@ session_start(); ?>
         <?php
         if (isset($customer)) {
             echo '<form action="bord.php" method="post">
+            <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
                 <input type="hidden" name="move" value="desc">
                 <input type="submit" value="新しい順">
             </form>
             <form action="bord.php" method="post">
+            <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
                 <input type="hidden" name="move" value="nomal">
                 <input type="submit" value="古い順">
             </form>';
@@ -223,6 +232,7 @@ session_start(); ?>
                 echo '?pagenum=', $pagenum;
             }
             echo '" method="post">
+            <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
             <input type="hidden" name="move" value="page_down">
             <input type="submit" value="<">
         </form>';
@@ -234,6 +244,7 @@ session_start(); ?>
                 echo '?pagenum=', $pagenum;
             }
             echo '" method="post">
+            <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
             <input type="hidden" name="move" value="page_up">
             <input type="submit" value=">">
         </form>';
@@ -242,15 +253,10 @@ session_start(); ?>
     </div>
     <br>
 
-
-
-
     <?php
-
-
     $page = [$pagenum * 30, ($pagenum + 1) * 30];
     if (isset($_SESSION['customer'])) {
-        $sort = $customer['sort'];
+        $sort = $_SESSION['customer']['sort'];
     } else {
         $sort = "order by chat_data.id desc";
     }
@@ -279,12 +285,14 @@ session_start(); ?>
                 $followcheck = $followcheck->fetch();
                 if (empty($followcheck)) {
                     echo '<form action="bord.php" method="post">
+                    <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
             <input type="hidden" name="move" value="follow">
             <input type="hidden" name="id" value="', $data['name_id'], '">
             <input type="submit" value="フォロー">
             </form>';
                 } else {
                     echo '<form action="bord.php" method="post">
+                    <input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">
             <input type="hidden" name="move" value="follow_clear">
             <input type="hidden" name="id" value="', $data['name_id'], '">
             <input type="submit" value="フォロー解除">
@@ -311,6 +319,7 @@ session_start(); ?>
         echo '</p>';
         if ($login) {
             echo '<form action="bord.php" method="post">';
+            echo '<input type="hidden" name="token" value="',htmlspecialchars($token,ENT_COMPAT,'UTF-8'),'">';
             echo '<input type="hidden" name="id" value="', $data['id'], '">';
             echo '<input type="hidden" name="move" value="nice">';
             echo '<input type="submit" value="いいね">';
